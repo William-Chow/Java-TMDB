@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">JavaTMDB</string>
+    <string name="overview">Overview</string>
+    <string name="title">Title</string>
+</resources>
