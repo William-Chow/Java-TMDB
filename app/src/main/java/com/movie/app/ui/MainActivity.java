@@ -7,16 +7,19 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.google.android.material.snackbar.Snackbar;
 import com.movie.app.R;
 import com.movie.app.adapter.MovieAdapter;
@@ -34,7 +37,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
-    LinearLayoutCompat llContent;
+    RelativeLayout rlContent;
     private Long backPressedTime = 0L;
     private APIInterface apiInterface;
     private RecyclerView rvMovie;
@@ -43,20 +46,36 @@ public class MainActivity extends AppCompatActivity {
     private final List<Movie> originalList = new ArrayList<>();
     private final List<Movie> searchList = new ArrayList<>();
 
+    private AdView mAdViewTop;
+    private AdView mAdViewBottom;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        llContent = findViewById(R.id.llContent);
+        rlContent = findViewById(R.id.rlContent);
         rvMovie = findViewById(R.id.rvMovie);
         apiInterface = APIClient.getClient().create(APIInterface.class);
+
+        initAdmob();
+        admobBanner();
 
         // Check Internet Connection
         if (Utils.getConnectionType(this)) {
             getPopularMovieList();
         } else {
-            Snackbar.make(llContent, "No Internet Connection. Please Try Again", Snackbar.LENGTH_LONG).show();
+            Snackbar.make(rlContent, "No Internet Connection. Please Try Again", Snackbar.LENGTH_LONG).show();
         }
+    }
+
+    private void initAdmob(){
+        MobileAds.initialize(this);
+    }
+
+    private void admobBanner(){
+        mAdViewTop = findViewById(R.id.adViewTop);
+        mAdViewBottom = findViewById(R.id.adViewBottom);
+        mAdViewTop.loadAd(new AdRequest.Builder().build());
+        mAdViewBottom.loadAd(new AdRequest.Builder().build());
     }
 
     private void getPopularMovieList() {
@@ -74,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Call<Result> call, @NonNull Throwable t) {
                 call.cancel();
-                Snackbar.make(llContent, "Error. Please Try Again later.", Snackbar.LENGTH_LONG).show();
+                Snackbar.make(rlContent, "Error. Please Try Again later.", Snackbar.LENGTH_LONG).show();
             }
         });
     }
@@ -91,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
             });
             rvMovie.setAdapter(movieAdapter);
         } else {
-            Snackbar.make(llContent, "No result found. Please Try Again later.", Snackbar.LENGTH_LONG).show();
+            Snackbar.make(rlContent, "No result found. Please Try Again later.", Snackbar.LENGTH_LONG).show();
         }
     }
 

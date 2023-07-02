@@ -2,4 +2,7 @@
     <string name="app_name">JavaTMDB</string>
     <string name="overview">Overview</string>
     <string name="title">Title</string>
+
+    <string name="admob_id">ca-app-pub-4541063798492496~6327587975</string>
+    <string name="admob_banner_ad_unit_id">ca-app-pub-4541063798492496/8685006624</string>
 </resources>
