@@ -1,4 +1,4 @@
-package com.movie.app.network;
+package com.movie.tmdb.app.network;
 
 import java.util.UUID;
 

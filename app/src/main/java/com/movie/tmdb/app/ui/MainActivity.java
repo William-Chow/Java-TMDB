@@ -1,6 +1,6 @@
-package com.movie.app.ui;
+package com.movie.tmdb.app.ui;
 
-import static com.movie.app.network.APIClient.API_KEY;
+import static com.movie.tmdb.app.network.APIClient.API_KEY;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -21,13 +21,13 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.material.snackbar.Snackbar;
-import com.movie.app.R;
-import com.movie.app.adapter.MovieAdapter;
-import com.movie.app.network.APIClient;
-import com.movie.app.network.APIInterface;
-import com.movie.app.network.Movie;
-import com.movie.app.network.Result;
-import com.movie.app.util.Utils;
+import com.movie.tmdb.app.R;
+import com.movie.tmdb.app.adapter.MovieAdapter;
+import com.movie.tmdb.app.model.Movie;
+import com.movie.tmdb.app.model.Result;
+import com.movie.tmdb.app.network.APIClient;
+import com.movie.tmdb.app.network.APIInterface;
+import com.movie.tmdb.app.util.Utils;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.movie.app'
+    namespace 'com.movie.tmdb.app'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.movie.app"
+        applicationId "com.movie.tmdb.app"
         minSdk 28
         targetSdk 33
         versionCode 1

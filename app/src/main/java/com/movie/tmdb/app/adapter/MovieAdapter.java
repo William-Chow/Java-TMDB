@@ -1,4 +1,4 @@
-package com.movie.app.adapter;
+package com.movie.tmdb.app.adapter;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -12,9 +12,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.movie.app.R;
-import com.movie.app.network.Movie;
-import com.movie.app.util.Utils;
+import com.movie.tmdb.app.R;
+import com.movie.tmdb.app.model.Movie;
+import com.movie.tmdb.app.util.Utils;
 
 import java.util.List;
 

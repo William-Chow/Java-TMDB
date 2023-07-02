@@ -121,17 +121,17 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:350678992793:android:35c42d54117d063c713508",
+        "mobilesdk_app_id": "1:350678992793:android:1ab84e7afc029158713508",
         "android_client_info": {
-          "package_name": "com.movie.app"
+          "package_name": "com.movie.tmdb.app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "350678992793-2veqlhttor2f0vrg8vm7o8515oukf67q.apps.googleusercontent.com",
+          "client_id": "350678992793-ouksuqaco13dvn7b7k8st2bu4qj9i0qe.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.movie.app",
+            "package_name": "com.movie.tmdb.app",
             "certificate_hash": "cbf916310bcfe8d37d4ed1381e676efd4d600cd6"
           }
         },

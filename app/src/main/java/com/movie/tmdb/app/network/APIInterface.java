@@ -1,4 +1,7 @@
-package com.movie.app.network;
+package com.movie.tmdb.app.network;
+
+import com.movie.tmdb.app.model.Movie;
+import com.movie.tmdb.app.model.Result;
 
 import retrofit2.Call;
 import retrofit2.http.GET;

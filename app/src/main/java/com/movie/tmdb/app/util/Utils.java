@@ -1,4 +1,4 @@
-package com.movie.app.util;
+package com.movie.tmdb.app.util;
 
 import android.content.Context;
 import android.net.ConnectivityManager;

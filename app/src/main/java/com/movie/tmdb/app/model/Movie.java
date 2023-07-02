@@ -1,4 +1,4 @@
-package com.movie.app.network;
+package com.movie.tmdb.app.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.gson.annotations.SerializedName;
