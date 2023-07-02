@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextChange(String query) {
                 Log.d("onQueryTextChange", "query: " + query);
-                if (query.length() >= 3) {
+                if (query.length() >= 2) {
                     getSearchResult(query);
                 } else {
                     movieAdapter.updateList(originalList);
