@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupAdapter(List<Movie> popularList) {
-        if (popularList.size() > 0) {
+        if (!popularList.isEmpty()) {
             movieAdapter = new MovieAdapter(this, popularList);
             rvMovie.setHasFixedSize(true);
             rvMovie.setLayoutManager(new GridLayoutManager(this, 2));
@@ -178,6 +178,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        super.onBackPressed();
         if (backPressedTime + 3000 > System.currentTimeMillis()) {
             finish();
         } else {
