@@ -1,24 +1,48 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
 }
 
 android {
     namespace 'com.movie.tmdb.app'
-    compileSdk 36
+    compileSdk = 36
 
     defaultConfig {
         applicationId "com.movie.tmdb.app"
         minSdk 28
         targetSdk 36
-        versionCode 2
-        versionName "2.0"
+        versionCode 3
+        versionName "3.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    /*
+    storeFile=app/keystore/weelim-keystore.jks
+    storePassword=weelim
+    keyAlias=weelim
+    keyPassword=weelim
+     */
+    signingConfigs {
+        release {
+            def keystorePropertiesFile = rootProject.file("key.properties")
+            if (keystorePropertiesFile.exists()) {
+                def keystoreProperties = new Properties()
+                keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
+                storeFile = rootProject.file(keystoreProperties['storeFile'])
+                storePassword = keystoreProperties['storePassword']
+                keyAlias = keystoreProperties['keyAlias']
+                keyPassword = keystoreProperties['keyPassword']
+            }
+        }
+    }
+
     buildTypes {
         release {
-            minifyEnabled false
+            signingConfig signingConfigs.release
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -26,11 +50,30 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+    buildFeatures {
+        compose true
+    }
+
+    packaging {
+        resources {
+            excludes += "/META-INF/versions/9/OSGI-INF/MANIFEST.MF"
+        }
+    }
 }
 
 dependencies {
     implementation libs.appcompat
     implementation libs.material
+    implementation libs.androidx.activity.compose
+    implementation platform(libs.androidx.compose.bom)
+    implementation libs.androidx.compose.ui
+    implementation libs.androidx.compose.ui.tooling.preview
+    implementation libs.androidx.compose.material3
+    implementation libs.coil.compose
+    implementation libs.androidx.core.ktx
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
@@ -43,15 +86,11 @@ dependencies {
 
     //Glide
     implementation libs.glide
-    // Padding / Margin
-    implementation libs.sdp.android
-    // Text Size
-    implementation libs.ssp.android
-
     // Import the Firebase BoM
     implementation platform(libs.firebase.bom)
     // Admob
     implementation libs.play.services.ads
 
     implementation libs.app.update
+    debugImplementation libs.androidx.compose.ui.tooling
 }
