@@ -5,9 +5,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -122,7 +125,9 @@ private fun DetailAdMobBanner() {
     val context = androidx.compose.ui.platform.LocalContext.current
     val adUnitId = stringResource(R.string.admob_banner_ad_unit_id)
     AndroidView(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .windowInsetsPadding(WindowInsets.navigationBars)
+            .fillMaxWidth(),
         factory = {
             AdView(context).apply {
                 this.adUnitId = adUnitId

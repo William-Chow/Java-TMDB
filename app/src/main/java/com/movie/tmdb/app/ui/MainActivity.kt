@@ -10,9 +10,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -187,7 +190,7 @@ private fun MovieListScreen(
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         bottomBar = {
-            AdMobBanner()
+            AdMobBanner(modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars))
         }
     ) { innerPadding ->
         Column(
@@ -264,11 +267,11 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
 }
 
 @Composable
-private fun AdMobBanner() {
+private fun AdMobBanner(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val adUnitId = stringResource(R.string.admob_banner_ad_unit_id)
     AndroidView(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         factory = {
             AdView(context).apply {
                 this.adUnitId = adUnitId
