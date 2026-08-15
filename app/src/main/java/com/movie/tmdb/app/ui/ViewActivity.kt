@@ -112,7 +112,7 @@ private fun MovieDetailScreen(movie: Movie?, errorMessage: String?) {
                 style = MaterialTheme.typography.bodyMedium
             )
             AsyncImage(
-                model = "${Utils.image_url}${movie?.poster_path ?: ""}",
+                model = "${Utils.IMAGE_URL}${movie?.posterPath ?: ""}",
                 contentDescription = movie?.title ?: "Movie image",
                 modifier = Modifier.fillMaxWidth()
             )

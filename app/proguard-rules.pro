@@ -19,5 +19,6 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
--keep class com.movie.app.network.** { *;}
--keep class com.movie.app.util.** { *; }
+-keep class com.movie.tmdb.app.network.** { *;}
+-keep class com.movie.tmdb.app.util.** { *; }
+-keep class com.movie.tmdb.app.model.** { *; }

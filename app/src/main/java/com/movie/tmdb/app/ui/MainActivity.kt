@@ -250,12 +250,12 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
     Card(modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)) {
         Column(modifier = Modifier.padding(8.dp)) {
             AsyncImage(
-                model = "${Utils.image_url}${movie.poster_path}",
-                contentDescription = movie.title ?: movie.original_title,
+                model = "${Utils.IMAGE_URL}${movie.posterPath}",
+                contentDescription = movie.title ?: movie.originalTitle,
                 modifier = Modifier.fillMaxWidth()
             )
             Text(
-                text = movie.original_title ?: movie.title ?: "",
+                text = movie.originalTitle ?: movie.title ?: "",
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
