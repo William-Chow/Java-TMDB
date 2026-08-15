@@ -84,13 +84,8 @@ dependencies {
     implementation libs.logging.interceptor
     implementation libs.converter.jackson
 
-    //Glide
-    implementation libs.glide
-    // Import the Firebase BoM
-    implementation platform(libs.firebase.bom)
     // Admob
     implementation libs.play.services.ads
 
-    implementation libs.app.update
     debugImplementation libs.androidx.compose.ui.tooling
 }

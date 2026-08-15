@@ -79,9 +79,8 @@ matters because Gson reflects over it.
   already in the git history. Move it to `local.properties` + `BuildConfig` if
   this repo ever matters; note that even then the key ships inside the APK, so
   a genuinely secret key needs a backend proxy.
-- `glide`, `firebase-bom`, and `app-update` are declared in `app/build.gradle`
-  but not referenced anywhere in the source — leftovers from the pre-Compose
-  version, safe to drop.
-- `res/layout/` and `res/menu/` are empty for the same reason.
+- The models still carry Jackson's `@JsonIgnoreProperties`, but Retrofit is
+  configured with `GsonConverterFactory` only — Jackson never runs. Dropping
+  the annotation would also let `converter-jackson` go.
 - A Kotlin Multiplatform sibling of this app (Android + iOS, Compose
   Multiplatform, Ktor) lives in **TMDBProject**.
