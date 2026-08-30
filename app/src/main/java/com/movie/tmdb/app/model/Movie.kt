@@ -1,9 +1,7 @@
 package com.movie.tmdb.app.model
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.google.gson.annotations.SerializedName
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 data class Movie(
     @SerializedName("adult")
     val adult: Boolean = false,
@@ -44,6 +42,12 @@ data class Movie(
     @SerializedName("revenue")
     val revenue: Long? = null,
 
+    @SerializedName("runtime")
+    val runtime: Int? = null,
+
+    @SerializedName("genres")
+    val genres: List<Genre>? = null,
+
     @SerializedName("status")
     val status: String? = null,
 
@@ -60,5 +64,21 @@ data class Movie(
     val voteAverage: Double? = null,
 
     @SerializedName("vote_count")
-    val voteCount: Int = 0
-)
+    val voteCount: Int = 0,
+
+    // Populated only on the detail request, via append_to_response.
+    @SerializedName("credits")
+    val credits: Credits? = null,
+
+    @SerializedName("videos")
+    val videos: Videos? = null,
+
+    @SerializedName("similar")
+    val similar: Result? = null
+) {
+    val trailerUrl: String?
+        get() = videos?.results
+            ?.filter { it.isYouTube && it.type.equals("Trailer", ignoreCase = true) }
+            ?.minByOrNull { if (it.official) 0 else 1 }
+            ?.watchUrl
+}

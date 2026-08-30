@@ -1,29 +1,29 @@
 package com.movie.tmdb.app.network
 
+import com.movie.tmdb.app.BuildConfig
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 object APIClient {
-
-    const val API_KEY = "1ee04cdd24bdc8497ec43f739fd3b5a5"
 
     private const val BASE_URL = "https://api.themoviedb.org/3/"
 
     private val retrofit: Retrofit by lazy {
         val interceptor = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
+            // Response bodies carry the api_key-bearing URL; keep them out of release logcat.
+            level = if (BuildConfig.DEBUG) {
+                HttpLoggingInterceptor.Level.BODY
+            } else {
+                HttpLoggingInterceptor.Level.NONE
+            }
         }
         val client = OkHttpClient.Builder()
             .addInterceptor(interceptor)
-            .addInterceptor { chain ->
-                val newRequest = chain.request().newBuilder()
-                    .addHeader("Authorization", UUID.randomUUID().toString())
-                    .build()
-                chain.proceed(newRequest)
-            }
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(20, TimeUnit.SECONDS)
             .build()
 
         Retrofit.Builder()
@@ -33,5 +33,5 @@ object APIClient {
             .build()
     }
 
-    fun getClient(): Retrofit = retrofit
+    val api: APIInterface by lazy { retrofit.create(APIInterface::class.java) }
 }
