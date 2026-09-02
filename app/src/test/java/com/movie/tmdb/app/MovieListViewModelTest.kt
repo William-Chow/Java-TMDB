@@ -197,6 +197,25 @@ class MovieListViewModelTest {
         assertEquals("top_rated", vm.uiState.value.movies.single().title)
     }
 
+    /** The state's tab drives the tab-row indicator; it used to never leave POPULAR. */
+    @Test
+    fun `selecting a tab is reflected in the state`() = runTest(dispatcherRule.dispatcher.scheduler) {
+        api.listResponse = { _, p -> page(popular, p) }
+
+        val vm = viewModel()
+        advanceUntilIdle()
+        assertEquals(ListTab.Category(MovieCategory.POPULAR), vm.uiState.value.tab)
+
+        vm.onTabSelected(ListTab.Category(MovieCategory.UPCOMING))
+        advanceUntilIdle()
+        assertEquals(ListTab.Category(MovieCategory.UPCOMING), vm.uiState.value.tab)
+
+        vm.onTabSelected(ListTab.Favorites)
+        advanceUntilIdle()
+        assertEquals(ListTab.Favorites, vm.uiState.value.tab)
+        assertTrue(vm.uiState.value.isFavoritesTab)
+    }
+
     @Test
     fun `toggling a favorite adds then removes it`() = runTest(dispatcherRule.dispatcher.scheduler) {
         api.listResponse = { _, p -> page(popular, p) }

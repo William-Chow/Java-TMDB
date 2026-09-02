@@ -109,6 +109,7 @@ class MovieListViewModel(
     }
 
     fun onTabSelected(tab: ListTab) {
+        _uiState.update { it.copy(tab = tab) }
         tabs.value = tab
     }
 
