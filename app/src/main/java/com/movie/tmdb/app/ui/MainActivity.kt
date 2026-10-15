@@ -33,6 +33,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -177,6 +178,7 @@ private fun MovieListScreen(
                         movies = state.movies,
                         favoriteIds = state.favoriteIds,
                         isLoadingMore = state.isLoadingMore,
+                        loadMoreFailed = state.loadMoreFailed,
                         onLoadMore = viewModel::loadNextPage,
                         onToggleFavorite = viewModel::toggleFavorite,
                         onMovieClick = onMovieClick
@@ -214,6 +216,7 @@ private fun MovieGrid(
     movies: List<Movie>,
     favoriteIds: Set<Int>,
     isLoadingMore: Boolean,
+    loadMoreFailed: Boolean,
     onLoadMore: () -> Unit,
     onToggleFavorite: (Movie) -> Unit,
     onMovieClick: (Movie) -> Unit
@@ -226,7 +229,9 @@ private fun MovieGrid(
         }
     }
 
-    LaunchedEffect(shouldLoadMore) {
+    // Keyed on the size too: a page that adds only a few rows leaves shouldLoadMore true,
+    // and an effect keyed on the flag alone would never ask again.
+    LaunchedEffect(shouldLoadMore, movies.size) {
         if (shouldLoadMore) onLoadMore()
     }
 
@@ -253,6 +258,16 @@ private fun MovieGrid(
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator()
+                }
+            }
+        } else if (loadMoreFailed) {
+            // The scroll trigger has already fired for this position, so retrying needs a tap.
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    TextButton(onClick = onLoadMore) { Text(stringResource(R.string.retry)) }
                 }
             }
         }

@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.yield
 
 fun movie(id: Int, title: String = "Movie $id") = Movie(id = id, title = title)
 
@@ -82,5 +83,10 @@ class FakeFavoriteDao : FavoriteDao {
         rows.update { current -> current.filterNot { it.id == id } }
     }
 
-    override suspend fun isFavorite(id: Int): Boolean = rows.value.any { it.id == id }
+    /** Answers from a snapshot, then suspends like a real query, so check-then-act races can surface. */
+    override suspend fun isFavorite(id: Int): Boolean {
+        val answer = rows.value.any { it.id == id }
+        yield()
+        return answer
+    }
 }

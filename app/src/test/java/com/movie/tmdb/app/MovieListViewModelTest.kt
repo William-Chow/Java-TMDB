@@ -2,6 +2,7 @@ package com.movie.tmdb.app
 
 import com.movie.tmdb.app.data.MovieRepository
 import com.movie.tmdb.app.data.ConnectivityChecker
+import com.movie.tmdb.app.data.toCacheEntity
 import com.movie.tmdb.app.model.MovieCategory
 import com.movie.tmdb.app.ui.ListTab
 import com.movie.tmdb.app.ui.MovieListViewModel
@@ -180,8 +181,31 @@ class MovieListViewModelTest {
 
             assertEquals(20, vm.uiState.value.movies.size)
             assertFalse(vm.uiState.value.isLoadingMore)
+            assertTrue(vm.uiState.value.loadMoreFailed)
             assertEquals(listOf(R.string.error_network), messages)
         }
+
+    @Test
+    fun `a failed next page can be retried`() = runTest(dispatcherRule.dispatcher.scheduler) {
+        var failNextPage = true
+        api.listResponse = { _, p ->
+            if (p == 2 && failNextPage) throw IOException("boom")
+            page(moviesOnPage(p), p, totalPages = 3)
+        }
+
+        val vm = viewModel()
+        advanceUntilIdle()
+        vm.loadNextPage()
+        advanceUntilIdle()
+        assertTrue(vm.uiState.value.loadMoreFailed)
+
+        failNextPage = false
+        vm.loadNextPage()
+        advanceUntilIdle()
+
+        assertFalse(vm.uiState.value.loadMoreFailed)
+        assertEquals((1..40).toList(), vm.uiState.value.movies.map { it.id })
+    }
 
     @Test
     fun `switching category fetches that endpoint`() = runTest(dispatcherRule.dispatcher.scheduler) {
@@ -250,4 +274,112 @@ class MovieListViewModelTest {
             assertEquals(listOf(7), vm.uiState.value.movies.map { it.id })
             assertEquals(callsBefore, api.listCalls.size)
         }
+
+    @Test
+    fun `a refresh that interrupts the next page clears its spinner`() =
+        runTest(dispatcherRule.dispatcher.scheduler) {
+            api.listResponse = { _, p ->
+                if (p == 2) delay(1_000)
+                page(moviesOnPage(p), p, totalPages = 3)
+            }
+
+            val vm = viewModel()
+            advanceUntilIdle()
+            vm.loadNextPage()
+            advanceTimeBy(100)
+            assertTrue(vm.uiState.value.isLoadingMore)
+
+            vm.refresh()
+            advanceUntilIdle()
+            assertFalse(vm.uiState.value.isLoadingMore)
+
+            vm.loadNextPage()
+            advanceUntilIdle()
+            assertEquals((1..40).toList(), vm.uiState.value.movies.map { it.id })
+        }
+
+    @Test
+    fun `a next page asked for mid-refresh waits for it instead of skipping pages`() =
+        runTest(dispatcherRule.dispatcher.scheduler) {
+            api.listResponse = { _, p ->
+                when (p) {
+                    1 -> delay(100)
+                    3 -> delay(500)
+                }
+                page(moviesOnPage(p), p, totalPages = 3)
+            }
+
+            val vm = viewModel()
+            advanceUntilIdle()
+            vm.loadNextPage()
+            advanceUntilIdle()
+
+            vm.refresh()
+            advanceTimeBy(10) // the refreshed page 1 is still in flight
+            vm.loadNextPage()
+            advanceUntilIdle()
+
+            assertEquals((1..40).toList(), vm.uiState.value.movies.map { it.id })
+            assertEquals(listOf(1, 2, 1, 2), api.listCalls.map { it.second })
+        }
+
+    @Test
+    fun `a next page asked for before the first page lands is loaded after it`() =
+        runTest(dispatcherRule.dispatcher.scheduler) {
+            api.listResponse = { _, p ->
+                if (p == 1) delay(100)
+                page(moviesOnPage(p), p, totalPages = 3)
+            }
+            // A warm cache puts rows on screen while page 1 is still loading.
+            movieDao.insertAll(moviesOnPage(1).mapIndexed { i, m -> m.toCacheEntity("popular", i, 1) })
+
+            val vm = viewModel()
+            advanceTimeBy(10)
+            assertEquals(20, vm.uiState.value.movies.size)
+            vm.loadNextPage()
+            advanceUntilIdle()
+
+            assertEquals((1..40).toList(), vm.uiState.value.movies.map { it.id })
+        }
+
+    @Test
+    fun `a failed refresh of search results keeps them on screen`() =
+        runTest(dispatcherRule.dispatcher.scheduler) {
+            api.listResponse = { _, p -> page(popular, p) }
+            api.searchResponse = { q, p -> page(listOf(movie(99, q)), p) }
+
+            val vm = viewModel()
+            advanceUntilIdle()
+            vm.onQueryChange("batman")
+            advanceUntilIdle()
+            val messages = mutableListOf<Int>()
+            backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+                vm.messages.collect { messages += it }
+            }
+
+            online = false
+            vm.refresh()
+            advanceUntilIdle()
+
+            assertNull(vm.uiState.value.fatalError)
+            assertFalse(vm.uiState.value.isRefreshing)
+            assertEquals(listOf(99), vm.uiState.value.movies.map { it.id })
+            assertEquals(listOf(R.string.error_no_internet), messages)
+        }
+
+    @Test
+    fun `two quick taps on the heart cancel out`() = runTest(dispatcherRule.dispatcher.scheduler) {
+        api.listResponse = { _, p -> page(popular, p) }
+
+        val vm = viewModel()
+        advanceUntilIdle()
+
+        vm.toggleFavorite(popular.first())
+        vm.toggleFavorite(popular.first())
+        advanceUntilIdle()
+
+        assertTrue(vm.uiState.value.favoriteIds.isEmpty())
+    }
+
+    private fun moviesOnPage(p: Int) = ((p - 1) * 20 + 1..p * 20).map(::movie)
 }

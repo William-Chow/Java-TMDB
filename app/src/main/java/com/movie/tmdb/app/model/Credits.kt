@@ -18,5 +18,9 @@ data class CastMember(
     val character: String? = null,
 
     @SerializedName("profile_path")
-    val profilePath: String? = null
+    val profilePath: String? = null,
+
+    // One per role: an actor playing several parts repeats [id], never this.
+    @SerializedName("credit_id")
+    val creditId: String? = null
 )

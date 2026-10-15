@@ -7,6 +7,8 @@ import com.movie.tmdb.app.model.Result
 import com.movie.tmdb.app.network.APIInterface
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /**
  * Categories are served from Room and refreshed from the network, so the list survives
@@ -20,6 +22,9 @@ class MovieRepository(
     private val apiKey: String = BuildConfig.TMDB_API_KEY,
     private val now: () -> Long = System::currentTimeMillis
 ) {
+
+    /** One repository per app (see AppContainer), so this covers every screen's toggles. */
+    private val favoriteLock = Mutex()
 
     fun observeCategory(category: MovieCategory): Flow<List<Movie>> =
         movieDao.observeCategory(category.path).map { entities -> entities.map(CachedMovieEntity::toMovie) }
@@ -49,8 +54,11 @@ class MovieRepository(
 
     fun observeFavoriteIds(): Flow<Set<Int>> = favoriteDao.observeIds().map { it.toSet() }
 
-    /** Returns the new state: true if the movie is now a favorite. */
-    suspend fun toggleFavorite(movie: Movie): Boolean =
+    /**
+     * Returns the new state: true if the movie is now a favorite. Toggles are serialized so a
+     * double tap can't read the same state twice and leave the heart where it started.
+     */
+    suspend fun toggleFavorite(movie: Movie): Boolean = favoriteLock.withLock {
         if (favoriteDao.isFavorite(movie.id)) {
             favoriteDao.remove(movie.id)
             false
@@ -58,6 +66,7 @@ class MovieRepository(
             favoriteDao.add(movie.toFavoriteEntity(now()))
             true
         }
+    }
 
     private companion object {
         /** TMDB list endpoints return 20 items per page. */

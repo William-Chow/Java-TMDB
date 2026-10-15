@@ -39,6 +39,8 @@ data class MovieListUiState(
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val isLoadingMore: Boolean = false,
+    /** The last next-page request failed; the grid offers a retry in place of the spinner. */
+    val loadMoreFailed: Boolean = false,
     /** Set only when the list is empty and reloading is the way out. */
     @param:StringRes val fatalError: Int? = null,
     val canLoadMore: Boolean = false,
@@ -75,6 +77,8 @@ class MovieListViewModel(
     private var observeJob: Job? = null
     private var firstPageJob: Job? = null
     private var loadMoreJob: Job? = null
+    /** The grid asked for more while a first page was loading; served once that page lands. */
+    private var loadMorePending = false
 
     init {
         viewModelScope.launch {
@@ -128,14 +132,24 @@ class MovieListViewModel(
     }
 
     fun loadNextPage() {
+        // A first page in flight resets paging when it lands, so a page fetched now would be
+        // discarded or leave a gap behind page 1. Remember the request and serve it afterwards.
+        if (firstPageJob?.isActive == true) {
+            loadMorePending = true
+            return
+        }
         val state = _uiState.value
         if (state.isLoading || state.isLoadingMore || !state.canLoadMore) return
         if (loadMoreJob?.isActive == true) return
 
+        startNextPage()
+    }
+
+    private fun startNextPage() {
         val current = mode
         val next = page + 1
         loadMoreJob = viewModelScope.launch {
-            _uiState.update { it.copy(isLoadingMore = true) }
+            _uiState.update { it.copy(isLoadingMore = true, loadMoreFailed = false) }
             try {
                 val more = when (current) {
                     is Mode.Category -> {
@@ -165,7 +179,7 @@ class MovieListViewModel(
                 throw e
             } catch (e: Exception) {
                 if (current != mode) return@launch
-                _uiState.update { it.copy(isLoadingMore = false) }
+                _uiState.update { it.copy(isLoadingMore = false, loadMoreFailed = true) }
                 _messages.trySend(e.toMessageRes())
             }
         }
@@ -175,14 +189,14 @@ class MovieListViewModel(
         mode = next
         observeJob?.cancel()
         firstPageJob?.cancel()
-        loadMoreJob?.cancel()
+        cancelLoadMore()
+        loadMorePending = false
         page = 1
         totalPages = 1
 
         _uiState.update {
             it.copy(
                 fatalError = null,
-                isLoadingMore = false,
                 canLoadMore = false,
                 isSearchResult = next is Mode.Search,
                 isFavoritesTab = next is Mode.Favorites
@@ -218,8 +232,14 @@ class MovieListViewModel(
 
     private fun startFirstPage(target: Mode, refreshing: Boolean) {
         firstPageJob?.cancel()
-        loadMoreJob?.cancel()
+        cancelLoadMore()
         firstPageJob = viewModelScope.launch { loadFirstPage(target, refreshing) }
+    }
+
+    /** A cancelled next-page job rethrows before its own cleanup runs, so its flags are reset here. */
+    private fun cancelLoadMore() {
+        loadMoreJob?.cancel()
+        _uiState.update { it.copy(isLoadingMore = false, loadMoreFailed = false) }
     }
 
     /**
@@ -229,7 +249,9 @@ class MovieListViewModel(
     private suspend fun loadFirstPage(target: Mode, refreshing: Boolean) {
         val hasContentAlready = when (target) {
             is Mode.Category -> repository.cachedCount(target.category) > 0
-            else -> false
+            // switchTo clears results before a new search, so anything here is being refreshed.
+            is Mode.Search -> _uiState.value.movies.isNotEmpty()
+            Mode.Favorites -> false
         }
         _uiState.update {
             it.copy(
@@ -272,6 +294,10 @@ class MovieListViewModel(
                 Mode.Favorites -> Unit
             }
             page = 1
+            if (loadMorePending) {
+                loadMorePending = false
+                if (_uiState.value.canLoadMore) startNextPage()
+            }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -283,6 +309,7 @@ class MovieListViewModel(
     /** With cached rows on screen a failure is a snackbar; with nothing to show it takes over the screen. */
     private fun finishFirstPage(target: Mode, hasContentAlready: Boolean, @StringRes message: Int) {
         if (target != mode) return
+        loadMorePending = false
         if (hasContentAlready) {
             _uiState.update { it.copy(isLoading = false, isRefreshing = false) }
             _messages.trySend(message)

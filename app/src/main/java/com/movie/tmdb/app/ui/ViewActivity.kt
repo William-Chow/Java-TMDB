@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AssistChip
@@ -236,7 +237,11 @@ private fun MovieDetailContent(
         movie.credits?.cast?.takeIf { it.isNotEmpty() }?.let { cast ->
             SectionHeader(stringResource(R.string.section_cast))
             LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(cast.take(MAX_CAST), key = { it.id }) { CastCard(it) }
+                // Not keyed on the person id: a duplicate key crashes the row.
+                itemsIndexed(
+                    cast.take(MAX_CAST),
+                    key = { index, member -> member.creditId ?: index }
+                ) { _, member -> CastCard(member) }
             }
         }
 

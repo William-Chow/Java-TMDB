@@ -50,6 +50,22 @@ class MovieJsonTest {
         assertEquals(listOf(11), movie.similar!!.results!!.map { it.id })
     }
 
+    /** The cast row is keyed on creditId; the person id repeats when one actor plays two parts. */
+    @Test
+    fun `an actor in two roles keeps a distinct credit id per role`() {
+        val json = """
+            {"id": 1, "credits": {"cast": [
+              {"id": 7, "name": "Same Actor", "character": "Twin A", "credit_id": "52fe4a01"},
+              {"id": 7, "name": "Same Actor", "character": "Twin B", "credit_id": "52fe4a02"}
+            ]}}
+        """.trimIndent()
+
+        val cast = gson.fromJson(json, Movie::class.java).credits!!.cast!!
+
+        assertEquals(listOf(7, 7), cast.map { it.id })
+        assertEquals(listOf("52fe4a01", "52fe4a02"), cast.map { it.creditId })
+    }
+
     @Test
     fun `trailer url prefers the official youtube trailer`() {
         val movie = gson.fromJson(detailJson, Movie::class.java)
