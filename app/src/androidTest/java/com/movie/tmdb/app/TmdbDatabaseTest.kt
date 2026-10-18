@@ -3,9 +3,10 @@ package com.movie.tmdb.app
 import androidx.room.Room
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.movie.tmdb.app.data.CachedMovieEntity
-import com.movie.tmdb.app.data.FavoriteEntity
 import com.movie.tmdb.app.data.TmdbDatabase
+import com.movie.tmdb.app.data.toCacheEntity
+import com.movie.tmdb.app.data.toFavoriteEntity
+import com.movie.tmdb.app.model.Movie
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -30,19 +31,8 @@ class TmdbDatabaseTest {
     @After
     fun tearDown() = database.close()
 
-    private fun cached(id: Int, position: Int, category: String = "popular") = CachedMovieEntity(
-        category = category,
-        id = id,
-        position = position,
-        page = 1,
-        title = "Movie $id",
-        originalTitle = null,
-        posterPath = null,
-        overview = null,
-        releaseDate = null,
-        voteAverage = null,
-        voteCount = 0
-    )
+    private fun cached(id: Int, position: Int, category: String = "popular") =
+        Movie(id = id, title = "Movie $id").toCacheEntity(category, position, page = 1)
 
     @Test
     fun cachedMoviesComeBackInServerOrder() = runBlocking {
@@ -88,15 +78,6 @@ class TmdbDatabaseTest {
         assertEquals(listOf(2), dao.observeIds().first())
     }
 
-    private fun favorite(id: Int, addedAt: Long) = FavoriteEntity(
-        id = id,
-        title = "Movie $id",
-        originalTitle = null,
-        posterPath = null,
-        overview = null,
-        releaseDate = null,
-        voteAverage = null,
-        voteCount = 0,
-        addedAt = addedAt
-    )
+    private fun favorite(id: Int, addedAt: Long) =
+        Movie(id = id, title = "Movie $id").toFavoriteEntity(addedAt)
 }

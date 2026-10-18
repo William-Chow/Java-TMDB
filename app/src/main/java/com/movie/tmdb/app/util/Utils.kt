@@ -8,13 +8,12 @@ object Utils {
 
     const val IMAGE_URL = "https://image.tmdb.org/t/p/w500"
 
-    // Check Internet Connection
+    // Check Internet Connection. Asks about the capability rather than the transport, so
+    // Ethernet, Bluetooth tethering and anything else that reaches the internet counts too.
     fun getConnectionType(context: Context): Boolean {
         val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
             ?: return false
         val capabilities = cm.getNetworkCapabilities(cm.activeNetwork) ?: return false
-        return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN)
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 }

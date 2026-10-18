@@ -10,6 +10,7 @@ def localPropertiesFile = rootProject.file("local.properties")
 if (localPropertiesFile.exists()) {
     localPropertiesFile.withInputStream { localProperties.load(it) }
 }
+def tmdbApiKey = localProperties.getProperty('tmdb.apiKey', '').trim()
 
 android {
     namespace 'com.movie.tmdb.app'
@@ -26,16 +27,9 @@ android {
 
         // Set tmdb.apiKey in local.properties (git-ignored). Note this still ships
         // inside the APK — a genuinely secret key needs a backend proxy.
-        buildConfigField "String", "TMDB_API_KEY",
-                "\"${localProperties.getProperty('tmdb.apiKey', '')}\""
+        buildConfigField "String", "TMDB_API_KEY", "\"${tmdbApiKey}\""
     }
 
-    /*
-    storeFile=app/keystore/weelim-keystore.jks
-    storePassword=weelim
-    keyAlias=weelim
-    keyPassword=weelim
-     */
     signingConfigs {
         release {
             def keystorePropertiesFile = rootProject.file("key.properties")
@@ -75,6 +69,25 @@ android {
             excludes += "/META-INF/versions/9/OSGI-INF/MANIFEST.MF"
         }
     }
+}
+
+ksp {
+    // Checked in, so each version's schema is on hand to write (or AutoMigrate) the next one.
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
+// A release without the key still builds, then 401s on every request; refuse to package one.
+// Debug builds keep working without it.
+def verifyTmdbApiKey = tasks.register('verifyTmdbApiKey') {
+    def hasKey = !tmdbApiKey.isEmpty()
+    doLast {
+        if (!hasKey) {
+            throw new GradleException("tmdb.apiKey is missing or blank in local.properties; release builds need it.")
+        }
+    }
+}
+tasks.named { it in ['packageRelease', 'packageReleaseBundle'] }.configureEach {
+    dependsOn verifyTmdbApiKey
 }
 
 dependencies {

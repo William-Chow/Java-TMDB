@@ -51,7 +51,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
-import com.google.android.gms.ads.MobileAds
 import com.movie.tmdb.app.R
 import com.movie.tmdb.app.model.CastMember
 import com.movie.tmdb.app.model.Movie
@@ -61,7 +60,6 @@ class ViewActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        MobileAds.initialize(this)
 
         val movieId = intent?.extras?.getInt(EXTRA_MOVIE_ID, 0) ?: 0
 

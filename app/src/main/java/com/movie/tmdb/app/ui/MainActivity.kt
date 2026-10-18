@@ -40,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,7 +52,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.google.android.gms.ads.MobileAds
 import com.movie.tmdb.app.R
 import com.movie.tmdb.app.model.Movie
 import com.movie.tmdb.app.model.MovieCategory
@@ -63,7 +63,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        MobileAds.initialize(this)
 
         setContent {
             JavaTmdbTheme {
@@ -174,15 +173,19 @@ private fun MovieListScreen(
                             )
                         }
 
-                    else -> MovieGrid(
-                        movies = state.movies,
-                        favoriteIds = state.favoriteIds,
-                        isLoadingMore = state.isLoadingMore,
-                        loadMoreFailed = state.loadMoreFailed,
-                        onLoadMore = viewModel::loadNextPage,
-                        onToggleFavorite = viewModel::toggleFavorite,
-                        onMovieClick = onMovieClick
-                    )
+                    // Keyed so each tab starts from the top: when both tabs have cached rows the
+                    // grid never leaves composition, and its scroll state would carry over.
+                    else -> key(state.tab) {
+                        MovieGrid(
+                            movies = state.movies,
+                            favoriteIds = state.favoriteIds,
+                            isLoadingMore = state.isLoadingMore,
+                            loadMoreFailed = state.loadMoreFailed,
+                            onLoadMore = viewModel::loadNextPage,
+                            onToggleFavorite = viewModel::toggleFavorite,
+                            onMovieClick = onMovieClick
+                        )
+                    }
                 }
             }
         }

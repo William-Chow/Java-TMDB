@@ -73,8 +73,8 @@ before the first build:
 tmdb.apiKey=your-tmdb-api-key
 ```
 
-It reaches the code as `BuildConfig.TMDB_API_KEY`. Without it the build still
-succeeds and every request comes back 401.
+It reaches the code as `BuildConfig.TMDB_API_KEY`. Without it a debug build still
+succeeds (and every request comes back 401); packaging a release fails.
 
 ```bash
 ./gradlew :app:assembleDebug
@@ -98,6 +98,10 @@ mapping of the list and `append_to_response` payloads.
 ```bash
 ./gradlew :app:connectedDebugAndroidTest
 ```
+
+Room schemas are exported to `app/schemas` and checked in. There is no
+destructive migration fallback, because favorites are user data: bumping the
+database version needs a `Migration` or `AutoMigration` written against them.
 
 ## Release
 
