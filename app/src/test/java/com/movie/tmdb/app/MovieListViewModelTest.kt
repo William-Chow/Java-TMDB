@@ -240,6 +240,31 @@ class MovieListViewModelTest {
         assertTrue(vm.uiState.value.isFavoritesTab)
     }
 
+    /** The grid is keyed on moviesTab; keyed on tab, a fresh grid could lay out the old tab's rows. */
+    @Test
+    fun `moviesTab moves with the new tab's rows, not with the tap`() = runTest(dispatcherRule.dispatcher.scheduler) {
+        val topRated = (101..120).map(::movie)
+        api.listResponse = { list, p -> page(if (list == "top_rated") topRated else popular, p) }
+
+        val vm = viewModel()
+        advanceUntilIdle()
+        assertEquals(ListTab.Category(MovieCategory.POPULAR), vm.uiState.value.moviesTab)
+
+        vm.onTabSelected(ListTab.Category(MovieCategory.TOP_RATED))
+        // The tab row moves at once, but the rows on screen are still Popular's.
+        assertEquals(ListTab.Category(MovieCategory.TOP_RATED), vm.uiState.value.tab)
+        assertEquals(ListTab.Category(MovieCategory.POPULAR), vm.uiState.value.moviesTab)
+        assertEquals(popular.map { it.id }, vm.uiState.value.movies.map { it.id })
+
+        advanceUntilIdle()
+        assertEquals(ListTab.Category(MovieCategory.TOP_RATED), vm.uiState.value.moviesTab)
+        assertEquals(topRated.map { it.id }, vm.uiState.value.movies.map { it.id })
+
+        vm.onTabSelected(ListTab.Favorites)
+        advanceUntilIdle()
+        assertEquals(ListTab.Favorites, vm.uiState.value.moviesTab)
+    }
+
     @Test
     fun `toggling a favorite adds then removes it`() = runTest(dispatcherRule.dispatcher.scheduler) {
         api.listResponse = { _, p -> page(popular, p) }

@@ -35,6 +35,11 @@ data class MovieListUiState(
     val tab: ListTab = ListTab.Category(MovieCategory.POPULAR),
     val query: String = "",
     val movies: List<Movie> = emptyList(),
+    /**
+     * The tab [movies] were loaded for. [tab] changes on the tap, but the new tab's rows land a
+     * little later; until then this still names the old tab, so the grid can tell them apart.
+     */
+    val moviesTab: ListTab = tab,
     val favoriteIds: Set<Int> = emptySet(),
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
@@ -208,7 +213,7 @@ class MovieListViewModel(
                 _uiState.update { it.copy(isLoading = false, isRefreshing = false) }
                 observeJob = viewModelScope.launch {
                     repository.observeFavorites().collect { favorites ->
-                        _uiState.update { it.copy(movies = favorites) }
+                        _uiState.update { it.copy(movies = favorites, moviesTab = ListTab.Favorites) }
                     }
                 }
             }
@@ -217,14 +222,14 @@ class MovieListViewModel(
                 // Room is the source of truth here, so cached rows paint before the network answers.
                 observeJob = viewModelScope.launch {
                     repository.observeCategory(next.category).collect { cached ->
-                        _uiState.update { it.copy(movies = cached) }
+                        _uiState.update { it.copy(movies = cached, moviesTab = ListTab.Category(next.category)) }
                     }
                 }
                 startFirstPage(next, refreshing = false)
             }
 
             is Mode.Search -> {
-                _uiState.update { it.copy(movies = emptyList()) }
+                _uiState.update { it.copy(movies = emptyList(), moviesTab = it.tab) }
                 startFirstPage(next, refreshing = false)
             }
         }

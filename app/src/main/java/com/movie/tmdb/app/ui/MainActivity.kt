@@ -174,8 +174,10 @@ private fun MovieListScreen(
                         }
 
                     // Keyed so each tab starts from the top: when both tabs have cached rows the
-                    // grid never leaves composition, and its scroll state would carry over.
-                    else -> key(state.tab) {
+                    // grid never leaves composition, and its scroll state would carry over. Keyed
+                    // on moviesTab rather than tab, so a fresh grid never lays out the old tab's
+                    // rows and then follows one of them down the new list.
+                    else -> key(state.moviesTab) {
                         MovieGrid(
                             movies = state.movies,
                             favoriteIds = state.favoriteIds,
