@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,7 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -63,6 +64,9 @@ class MainActivity : ComponentActivity() {
     private var backPressedTime = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Android 15+ forces edge-to-edge on apps targeting it; this makes 9-14 match, and the
+        // Scaffold insets (top bar, banner, content padding) already account for the system bars.
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         val adsConsent = (application as TmdbApplication).container.adsConsent
@@ -227,7 +231,7 @@ private fun CategoryTabs(selected: ListTab, onSelected: (ListTab) -> Unit) {
     }
     val selectedIndex = tabs.indexOf(selected).coerceAtLeast(0)
 
-    ScrollableTabRow(selectedTabIndex = selectedIndex, edgePadding = 8.dp) {
+    PrimaryScrollableTabRow(selectedTabIndex = selectedIndex, edgePadding = 8.dp) {
         tabs.forEach { tab ->
             val label = when (tab) {
                 is ListTab.Category -> stringResource(tab.category.labelRes)

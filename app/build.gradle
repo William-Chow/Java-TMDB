@@ -49,7 +49,12 @@ android {
         release {
             signingConfig signingConfigs.release
             minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // Play warns that the bundle has native code without debug symbols. The only native
+            // library is androidx.graphics.path (via Compose), which ships already stripped, so
+            // ndk.debugSymbolLevel has nothing to extract; the warning can be ignored until the
+            // app carries native code of its own.
         }
     }
     compileOptions {
