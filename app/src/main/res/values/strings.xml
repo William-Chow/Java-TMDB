@@ -5,6 +5,7 @@
     <string name="movie_details">Movie details</string>
     <string name="back">Back</string>
     <string name="retry">Retry</string>
+    <string name="privacy_settings">Privacy settings</string>
     <string name="press_back_again">Press back again to leave the app.</string>
     <string name="no_results_for">No results for \"%1$s\"</string>
     <string name="no_movies">No movies to show</string>

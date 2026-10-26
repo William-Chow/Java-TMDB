@@ -116,8 +116,9 @@ dependencies {
     implementation libs.converter.gson
     implementation libs.logging.interceptor
 
-    // Admob
+    // Admob, plus Google's consent SDK (UMP) for EEA/UK/Swiss users
     implementation libs.play.services.ads
+    implementation libs.user.messaging.platform
 
     debugImplementation libs.androidx.compose.ui.tooling
 }

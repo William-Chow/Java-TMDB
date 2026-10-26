@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.movie.tmdb.app.R
+import com.movie.tmdb.app.TmdbApplication
 import com.movie.tmdb.app.model.Movie
 import com.movie.tmdb.app.model.MovieCategory
 import com.movie.tmdb.app.ui.theme.JavaTmdbTheme
@@ -64,18 +65,28 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val adsConsent = (application as TmdbApplication).container.adsConsent
+
         setContent {
             JavaTmdbTheme {
+                val privacyOptionsRequired by adsConsent.privacyOptionsRequired.collectAsStateWithLifecycle()
                 MovieListScreen(
                     onMovieClick = { movie ->
                         startActivity(
                             Intent(this, ViewActivity::class.java)
                                 .putExtra(ViewActivity.EXTRA_MOVIE_ID, movie.id)
                         )
-                    }
+                    },
+                    privacyOptionsRequired = privacyOptionsRequired,
+                    onPrivacyOptions = { adsConsent.showPrivacyOptionsForm(this) }
                 )
             }
         }
+
+        // Google expects the consent check on every launch; banners wait for its answer. It must
+        // come after setContent: called earlier, UMP touches the window before it has content and
+        // the activity crashes on start for users who get the consent form.
+        adsConsent.gather(this)
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -98,6 +109,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun MovieListScreen(
     onMovieClick: (Movie) -> Unit,
+    privacyOptionsRequired: Boolean,
+    onPrivacyOptions: () -> Unit,
     viewModel: MovieListViewModel = viewModel(factory = MovieListViewModel.Factory)
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -111,9 +124,22 @@ private fun MovieListScreen(
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text(stringResource(R.string.app_name)) }) },
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.app_name)) },
+                actions = {
+                    // Where the consent form was shown, users must be able to change their answer.
+                    if (privacyOptionsRequired) {
+                        TextButton(onClick = onPrivacyOptions) {
+                            Text(stringResource(R.string.privacy_settings))
+                        }
+                    }
+                }
+            )
+        },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        bottomBar = { AdMobBanner() }
+        // Same test as the grid branch below: no ad on a loading, error or empty screen.
+        bottomBar = { AdMobBanner(visible = state.fatalError == null && state.movies.isNotEmpty()) }
     ) { innerPadding ->
         Column(
             modifier = Modifier

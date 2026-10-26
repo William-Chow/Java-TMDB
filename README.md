@@ -16,7 +16,7 @@ that survive going offline, and a detail screen with cast and trailers.
 | JSON | Gson (`@SerializedName`) |
 | Storage | Room 2.8 (KSP) — list cache + favorites |
 | Images | Coil (`AsyncImage`) |
-| Ads | AdMob banner (`play-services-ads`) |
+| Ads | AdMob anchored adaptive banner (`play-services-ads`), gated by Google's consent SDK (UMP); debug builds use Google's test IDs |
 | Build | AGP 8.9.1 / Gradle 9.4.1, Java 17, version catalog in `gradle/libs.versions.toml` |
 | SDK | `minSdk` 28, `compileSdk`/`targetSdk` 36 |
 
@@ -27,6 +27,7 @@ app/src/main/java/com/movie/tmdb/app/
   model/     Movie, Result, Genre, Credits, Videos — Gson data classes
              MovieCategory                          — the four list endpoints
   network/   APIClient, APIInterface — Retrofit setup + suspend endpoint definitions
+  ads/       AdsConsent              — UMP consent flow; initializes the Ads SDK once ads are allowed
   data/      TmdbDatabase, Daos, Entities — Room
              MovieRepository              — network + cache, the ViewModels' only dependency
              ConnectivityChecker          — keeps Context out of the ViewModels

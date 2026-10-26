@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Debug builds use Google's sample app and adaptive banner IDs, so they only ever serve test ads.
+    Tapping a live ad from a development phone counts as invalid traffic against the AdMob account.
+    Release builds keep the real IDs from main/res/values/strings.xml.
+-->
+<resources>
+    <string name="admob_id" translatable="false">ca-app-pub-3940256099942544~3347511713</string>
+    <string name="admob_banner_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/9214589741</string>
+</resources>

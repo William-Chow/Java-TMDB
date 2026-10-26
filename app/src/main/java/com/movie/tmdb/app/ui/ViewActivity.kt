@@ -136,7 +136,8 @@ private fun MovieDetailScreen(
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        bottomBar = { AdMobBanner() }
+        // No ad while the movie is loading or failed to load.
+        bottomBar = { AdMobBanner(visible = state.movie != null) }
     ) { innerPadding ->
         Box(
             modifier = Modifier
