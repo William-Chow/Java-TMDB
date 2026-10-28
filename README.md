@@ -124,9 +124,9 @@ R8 also shrinks resources. There are no hand-written keep rules: Gson keeps the
 models through their `@SerializedName` fields and Retrofit keeps `APIInterface`
 (see `app/proguard-rules.pro`), so every new model field needs `@SerializedName`.
 
-The privacy policy that Google Play and AdMob link to is
-[`docs/privacy-policy.md`](docs/privacy-policy.md); update it when the app starts
-collecting or sharing anything new.
+The privacy policy that Google Play, AdMob and the app's ⋮ menu link to is
+[`docs/privacy-policy.md`](docs/privacy-policy.md) (URL in `privacy_policy_url` in
+`strings.xml`); update it when the app starts collecting or sharing anything new.
 
 ## Notes
 

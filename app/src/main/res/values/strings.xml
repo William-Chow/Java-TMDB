@@ -6,6 +6,11 @@
     <string name="back">Back</string>
     <string name="retry">Retry</string>
     <string name="privacy_settings">Privacy settings</string>
+    <string name="privacy_policy">Privacy policy</string>
+    <string name="more_options">More options</string>
+    <string name="no_browser_app">No app available to open the link.</string>
+    <!-- Same page Google Play and AdMob link to; Play also requires it to be reachable in the app. -->
+    <string name="privacy_policy_url" translatable="false">https://github.com/William-Chow/Java-TMDB/blob/main/docs/privacy-policy.md</string>
     <string name="press_back_again">Press back again to leave the app.</string>
     <string name="no_results_for">No results for \"%1$s\"</string>
     <string name="no_movies">No movies to show</string>
