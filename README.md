@@ -120,8 +120,13 @@ If `key.properties` is absent, `app/build.gradle` leaves the `release` signing
 config unpopulated — build a release variant on a fresh clone only after adding
 it.
 
-ProGuard keeps `com.movie.tmdb.app.{network,util,model}` — the model package
-matters because Gson reflects over it.
+R8 also shrinks resources. There are no hand-written keep rules: Gson keeps the
+models through their `@SerializedName` fields and Retrofit keeps `APIInterface`
+(see `app/proguard-rules.pro`), so every new model field needs `@SerializedName`.
+
+The privacy policy that Google Play and AdMob link to is
+[`docs/privacy-policy.md`](docs/privacy-policy.md); update it when the app starts
+collecting or sharing anything new.
 
 ## Notes
 
